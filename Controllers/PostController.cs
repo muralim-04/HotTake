@@ -101,7 +101,7 @@ namespace practice_dotnet.Controllers
         }
 
         [Authorize]
-        [HttpPost("likeThePost")]
+        [HttpPost("likeThePost/{postId}")]
         public async Task<ActionResult<LikeResDto>> LikeThePost(int postId)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

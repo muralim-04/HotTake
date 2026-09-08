@@ -65,6 +65,7 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = existingUser.Id,
                 UserName = existingUser.UserName,
+                IsAdmin = existingUser.IsAdmin,
                 Email = existingUser.Email, 
                 AccessToken = token,
                 RefreshToken = refreshToken
@@ -105,6 +106,7 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = newUser.Id,
                 UserName = newUser.UserName,
+                IsAdmin = newUser.IsAdmin,
                 Email = newUser.Email,
                 AccessToken = token,
                 RefreshToken = refreshToken
@@ -149,12 +151,33 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = storedToken.User.Id,
                 UserName = storedToken.User.UserName,
+                IsAdmin = storedToken.User.IsAdmin,
                 Email = storedToken.User.Email,
                 AccessToken = newAccessToken,
                 RefreshToken = newRawRefreshToken
             };
 
             return Response<AuthResultDto>.Ok(response);
+        }
+        public async Task<Response<bool>> LogOut(int userId)
+        {
+            var existingUser = await _context.Users
+                .Include(u => u.RefreshToken)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (existingUser == null)
+            {
+                return Response<bool>.Fail("User with this id doesn't exist");
+            }
+
+            if(existingUser.RefreshToken != null)
+{
+                _context.Set<RefreshToken>().Remove(existingUser.RefreshToken);
+            }
+
+            await _context.SaveChangesAsync();
+                
+            return Response<bool>.Ok(true);
         }
         private string GenerateAccessToken(User user)
         {
@@ -192,5 +215,6 @@ namespace practice_dotnet.Services.AuthService
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
             return Convert.ToHexString(bytes);
         }
+
     }
 }

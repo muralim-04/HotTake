@@ -9,5 +9,6 @@ namespace practice_dotnet.Services.AuthService
         Task<Response<AuthResultDto>> Register(UserReqDto user);
         Task<Response<AuthResultDto>> LogIn(LogInDto user);
         Task<Response<AuthResultDto>> RefreshToken(string rawRefreshToken);
+        Task<Response<bool>> LogOut(int userId);
     }
 }

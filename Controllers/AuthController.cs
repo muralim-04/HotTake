@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using practice_dotnet.DTOs;
 using practice_dotnet.Entities;
 using practice_dotnet.Services.AuthService;
+using System.Security.Claims;
 
 namespace practice_dotnet.Controllers
 {
@@ -35,6 +37,7 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken
             };
@@ -61,6 +64,7 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken
             };
@@ -98,10 +102,30 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken
             };
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<ActionResult<bool>> Logout()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var response = await _authService.LogOut(userId);
+
+            Response.Cookies.Append("refreshToken", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+
+            return Ok(response.Data);
         }
 
         private void SetRefreshTokenCookie(string refreshToken)
