@@ -279,7 +279,7 @@ namespace practice_dotnet.Services.PostServices
                 await file.CopyToAsync(stream);
             }
 
-            return $"/uploads/{uniqueFileName}";
+            return $"/Uploads/{uniqueFileName}";
         }
 
         private void DeleteImageFile(string imageUrl)
@@ -288,7 +288,9 @@ namespace practice_dotnet.Services.PostServices
             {
                 string relativePath = imageUrl.TrimStart('/', '\\');
 
-                string filePath = Path.Combine(_environment.ContentRootPath, imageUrl);
+                string filePath = Path.Combine(_environment.ContentRootPath, relativePath);
+
+                Console.WriteLine(filePath);
 
                 if (File.Exists(filePath))
                 {
