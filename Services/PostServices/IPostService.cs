@@ -10,8 +10,7 @@ namespace practice_dotnet.Services.PostServices
         Task<Response<PagedResult<PostResDto>>> GetAllPosts(int pageNumber, int pageSize, int? userId = null);
         Task GetUserPosts();
         Task EditPost();
-        Task<Response<bool>> DeletePost(int postId, int userId);
-        Task<Response<bool>> DeletePostAdmin(int postId);
+        Task<Response<bool>> DeletePost(int postId, int userId, bool isAdmin);
 
         // COMMENTS SECTION
         Task<Response<CommentResDto>> CreateComment(int userId, CommentReqDto comment);

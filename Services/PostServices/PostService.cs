@@ -109,34 +109,18 @@ namespace practice_dotnet.Services.PostServices
             throw new NotImplementedException();
         }
 
-        public async Task<Response<bool>> DeletePost(int postId, int userId)
+        public async Task<Response<bool>> DeletePost(int postId, int userId, bool isAdmin)
         {
-            var post = await _context.UserPosts
-                .FirstOrDefaultAsync(p => p.Id == postId && p.UserId == userId);
-
-            if (post == null)
-            {
-                return Response<bool>.Fail("Post not found or access denied.");
-            }
-
-            if (!string.IsNullOrEmpty(post.ImageUrl))
-            {
-                DeleteImageFile(post.ImageUrl);
-            }
-
-            _context.UserPosts.Remove(post);
-            await _context.SaveChangesAsync();
-
-            return Response<bool>.Ok(true);
-        }
-        public async Task<Response<bool>> DeletePostAdmin(int postId)
-        {
-            var post = await _context.UserPosts
-                .FirstOrDefaultAsync(p => p.Id == postId);
+            var post = await _context.UserPosts.FindAsync(postId);
 
             if (post == null)
             {
                 return Response<bool>.Fail("Post not found.");
+            }
+
+            if (post.UserId != userId && !isAdmin)
+            {
+                return Response<bool>.Fail("Unauthorized");
             }
 
             if (!string.IsNullOrEmpty(post.ImageUrl))
@@ -289,8 +273,6 @@ namespace practice_dotnet.Services.PostServices
                 string relativePath = imageUrl.TrimStart('/', '\\');
 
                 string filePath = Path.Combine(_environment.ContentRootPath, relativePath);
-
-                Console.WriteLine(filePath);
 
                 if (File.Exists(filePath))
                 {

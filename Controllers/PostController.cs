@@ -67,26 +67,9 @@ namespace practice_dotnet.Controllers
         public async Task<ActionResult<bool>> DeletePost(int postId)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isAdmin = User.IsInRole("Admin");
 
-            var response = await _postService.DeletePost(postId, userId);
-
-            if (!response.Success)
-            {
-                return Problem(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: "Bad Request",
-                    detail: response.Message
-                );
-            }
-
-            return Ok(true);
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("deletePostAdmin/{postId}")]
-        public async Task<ActionResult<bool>> DeletePostAdmin(int postId)
-        { 
-            var response = await _postService.DeletePostAdmin(postId);
+            var response = await _postService.DeletePost(postId, userId, isAdmin);
 
             if (!response.Success)
             {
