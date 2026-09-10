@@ -8,6 +8,7 @@ namespace practice_dotnet.Services.UserServices
     {
         Task<Response<UserProfileDto>> GetUserProfile(int id);
         Task<Response<UserResDto>> UpdateUserDeatail(int userId, UpdateUserDto dto);
+        Task<Response<UserResDto>> UpdateUserAvatar(int userId, AvatarDto dto);
         Task<Response<bool>> UpdateUserPassword(int userId, UpdatePasswordDto dto);
         Task<Response<bool>> DeleteAccount(int id);
 

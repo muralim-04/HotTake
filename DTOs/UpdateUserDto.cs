@@ -4,8 +4,10 @@ namespace practice_dotnet.DTOs
 {
     public class UpdateUserDto
     {
-        [Required]
         [StringLength(30, MinimumLength = 3)]
         public required string UserName { get; set; }
+
+        [StringLength(90, MinimumLength = 3)]
+        public required string Bio { get; set; }
     }
 }

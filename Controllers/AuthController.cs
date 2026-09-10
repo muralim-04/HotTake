@@ -37,6 +37,7 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                AvatarUrl = response.Data.AvatarUrl,
                 IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken
@@ -64,6 +65,7 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                AvatarUrl = response.Data.AvatarUrl,
                 IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken
@@ -102,6 +104,7 @@ namespace practice_dotnet.Controllers
             {
                 Id = response.Data.Id,
                 UserName = response.Data.UserName,
+                AvatarUrl = response.Data.AvatarUrl,
                 IsAdmin = response.Data.IsAdmin,
                 Email = response.Data.Email,
                 Token = response.Data.AccessToken

@@ -65,6 +65,7 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = existingUser.Id,
                 UserName = existingUser.UserName,
+                AvatarUrl = existingUser.AvatarUrl,
                 IsAdmin = existingUser.IsAdmin,
                 Email = existingUser.Email, 
                 AccessToken = token,
@@ -106,6 +107,7 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = newUser.Id,
                 UserName = newUser.UserName,
+                AvatarUrl = newUser.AvatarUrl,
                 IsAdmin = newUser.IsAdmin,
                 Email = newUser.Email,
                 AccessToken = token,
@@ -151,6 +153,7 @@ namespace practice_dotnet.Services.AuthService
             {
                 Id = storedToken.User.Id,
                 UserName = storedToken.User.UserName,
+                AvatarUrl = storedToken.User.AvatarUrl,
                 IsAdmin = storedToken.User.IsAdmin,
                 Email = storedToken.User.Email,
                 AccessToken = newAccessToken,
