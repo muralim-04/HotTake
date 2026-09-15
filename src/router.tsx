@@ -4,6 +4,7 @@ import HomePage from './features/home/HomePage';
 import UserPage from './features/user/UserPage';
 import Register from './features/auth/RegisterPage';
 import LogIn from './features/auth/LogInPage';
+import PostDetail from './features/post/PostDetail';
 
 
 export const router = createBrowserRouter([
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
       {
         path: 'login', 
         element: <LogIn />,
+      },
+      {
+        path: 'post/:id', 
+        element: <PostDetail />,
       },
     ],
   },

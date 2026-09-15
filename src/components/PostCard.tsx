@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
 import { postServices } from "../services/postService";
 import { useUserStore } from "../stores/userStore";
 import type { PaginationResult, PostRes } from "../types/PostTypes";
@@ -13,6 +14,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, leaveComment }: PostCardProps) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate()
 
   const user = useUserStore((state) => state.user);
 
@@ -69,9 +71,12 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
     },
   });
   
+  const handleCardClick = () => {
+    navigate(`/post/${post.id}`)
+  }
   
   return (
-    <article className="w-full border-b border-slate-800 bg-slate-900/40 p-5 transition-colors hover:bg-slate-900/70 cursor-pointer">
+    <article onClick={handleCardClick} className="w-full border-b border-slate-800 bg-slate-900/40 p-5 transition-colors hover:bg-slate-900/70 cursor-pointer">
       <div className="mb-3 flex items-center justify-between ">
         <Link
           to="/user"

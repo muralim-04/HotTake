@@ -16,6 +16,16 @@ export const postServices = {
         return response.data;
     },
 
+    getPost: async (postId: number): Promise<PostRes> => {
+        const response = await apiClient.get<PostRes>(`api/post/getPost/${postId}`);
+        return response.data;
+    },
+
+    getPostComments: async (postId: number, pageNumber: number, pageSize: number): Promise<PaginationResult<CommentRes>> => {
+        const response = await apiClient.get<PaginationResult<CommentRes>>(`api/post/getPostsComments?postId=${postId}&pageNumber=${pageNumber}&pageSize=${pageSize}`);
+        return response.data;
+    },
+
     likePost: async (postId: number): Promise<LikePostRes> => {
         const response = await apiClient.post<LikePostRes>(`api/post/likeThePost/${postId}`);
         return response.data;
