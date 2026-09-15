@@ -6,7 +6,7 @@ namespace practice_dotnet.Services.PostServices
     public interface IPostService
     {
         Task<Response<PostResDto>> CreatePost(PostReqDto post, int userId);
-        Task GetPost();
+        Task<Response<PostResDto>> GetPost(int postId, int? userId = null);
         Task<Response<PagedResult<PostResDto>>> GetAllPosts(int pageNumber, int pageSize, int? userId = null);
         Task GetUserPosts();
         Task EditPost();

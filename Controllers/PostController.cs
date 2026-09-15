@@ -62,6 +62,27 @@ namespace practice_dotnet.Controllers
             return Ok(response.Data);
         }
 
+        [HttpGet("getPost/{postId}")]
+        public async Task<ActionResult<PostResDto>> GetPost(int postId)
+        {
+            int? userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId)
+                ? parsedId
+                : null;
+
+            var response = await _postService.GetPost(postId, userId);
+
+            if (!response.Success)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "Bad Request",
+                    detail: response.Message
+                );
+            }
+
+            return Ok(response.Data);
+        }
+
         [Authorize]
         [HttpDelete("deletePost/{postId}")]
         public async Task<ActionResult<bool>> DeletePost(int postId)
@@ -106,7 +127,7 @@ namespace practice_dotnet.Controllers
 
         [Authorize]
         [HttpPost("leaveComment")]
-        public async Task<ActionResult<LikeResDto>> LeaveComment([FromBody] CommentReqDto comment)
+        public async Task<ActionResult<CommentResDto>> LeaveComment([FromBody] CommentReqDto comment)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 

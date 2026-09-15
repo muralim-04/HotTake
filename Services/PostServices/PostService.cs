@@ -183,9 +183,32 @@ namespace practice_dotnet.Services.PostServices
             return Response<PagedResult<PostResDto>>.Ok(data);
         }
 
-        public Task GetPost()
+        public async Task<Response<PostResDto>> GetPost(int postId, int? userId = null)
         {
-            throw new NotImplementedException();
+            var post = await _context.UserPosts
+                .Where(up => up.Id == postId)
+                .Select(up => new PostResDto
+                {
+                    Id = up.Id,
+                    Content = up.Content,
+                    ImageUrl = up.ImageUrl,
+                    CreatedAt = up.CreatedAt,
+                    UserId = up.User.Id,
+                    Username = up.User.UserName,
+                    UserProfileImageUrl = up.User.AvatarUrl,
+                    LikeCount = up.Likes.Count,
+                    CommentCount = up.Comments.Count,
+                    IsLikedByCurrentUser = userId.HasValue && up.Likes.Any(l => l.UserId == userId.Value)
+                })
+                .FirstOrDefaultAsync();
+
+            if (post == null)
+            {
+                return Response<PostResDto>.Fail("Post with this ID doesn't exist.");
+            }
+
+            return Response<PostResDto>.Ok(post);
+
         }
 
         public Task GetPostComments()
