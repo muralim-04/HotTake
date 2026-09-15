@@ -62,8 +62,8 @@ export default function HomePage () {
                     onClose={() => setActivePostId(null)}
                     isSubmitting={commentMutation.isPending}
                     post={posts.items.find((p) => p.id === activePostId)!}
-                    onSubmit={(commentText: string) => {
-                    commentMutation.mutateAsync({
+                    onSubmit={ async (commentText: string) => {
+                    await commentMutation.mutateAsync({
                         postId: activePostId,
                         comment: commentText, 
                     });

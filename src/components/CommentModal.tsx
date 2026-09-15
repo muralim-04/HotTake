@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -22,15 +23,24 @@ export default function CommentModal({
   post,
 }: CommentModalProps) {
   const [comment, setComment] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!comment.trim() || isSubmitting) return;
-    await onSubmit(comment.trim());
-    setComment('');
-    onClose();
+    try{
+      await onSubmit(comment.trim());
+      setComment('');
+      onClose();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
+    }
   };
 
   const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
@@ -113,13 +123,18 @@ export default function CommentModal({
 
           <form onSubmit={handleSubmit} className="mt-2">
             <textarea
-              // autoFocus
               rows={3}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Post your reply..."
               className="w-full resize-none rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 text-sm text-slate-100 placeholder-slate-500 shadow-inner outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
+
+            {error && (
+              <div className="rounded-lg border border-red-500/30 bg-red-950/40 p-3 text-sm text-red-400">
+                {error}
+              </div>
+            )}
 
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
