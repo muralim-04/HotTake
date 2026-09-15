@@ -83,6 +83,23 @@ namespace practice_dotnet.Controllers
             return Ok(response.Data);
         }
 
+        [HttpGet("getPostComments")]
+        public async Task<ActionResult<PagedResult<CommentResDto>>> GetPostComments(int postId, int pageNumber = 1, int pageSize = 10)
+        {
+            var response = await _postService.GetPostComments(pageNumber, pageSize, postId);
+
+            if (!response.Success)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "Bad Request",
+                    detail: response.Message
+                );
+            }
+
+            return Ok(response.Data);
+        }
+
         [Authorize]
         [HttpDelete("deletePost/{postId}")]
         public async Task<ActionResult<bool>> DeletePost(int postId)

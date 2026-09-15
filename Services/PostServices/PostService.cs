@@ -211,9 +211,62 @@ namespace practice_dotnet.Services.PostServices
 
         }
 
-        public Task GetPostComments()
+        public async Task<Response<PagedResult<CommentResDto>>> GetPostComments(int pageNumber, int pageSize,int postId)
         {
-            throw new NotImplementedException();
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var postExists = await _context.UserPosts.AnyAsync(p => p.Id == postId);
+            if (!postExists)
+            {
+                return Response<PagedResult<CommentResDto>>.Fail("Post not found.");
+            }
+
+            var query = _context.Comments
+                .AsNoTracking()
+                .Where(c => c.PostId == postId);
+
+            var totalCount = await query.CountAsync();
+
+            if (totalCount == 0)
+            {
+                return Response<PagedResult<CommentResDto>>.Ok(new PagedResult<CommentResDto>
+                {
+                    Items = new List<CommentResDto>(),
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = 0,
+                    TotalPages = 0
+                });
+            }
+
+            var comments = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .ThenByDescending(c => c.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CommentResDto
+                {
+                    Id = c.Id,
+                    PostId = c.PostId,
+                    Comment = c.Content,
+                    CreatedAt = c.CreatedAt,
+                    UserId = c.UserId,
+                    Username = c.User.UserName,
+                    UserImageUrl = c.User.AvatarUrl
+                })
+                .ToListAsync();
+
+            var data = new PagedResult<CommentResDto>
+            {
+                Items = comments,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return Response<PagedResult<CommentResDto>>.Ok(data);
         }
 
         public Task GetUserComments()

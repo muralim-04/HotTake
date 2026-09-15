@@ -14,7 +14,7 @@ namespace practice_dotnet.Services.PostServices
 
         // COMMENTS SECTION
         Task<Response<CommentResDto>> CreateComment(int userId, CommentReqDto comment);
-        Task GetPostComments();
+        Task<Response<PagedResult<CommentResDto>>> GetPostComments(int pageNumber, int pageSize, int postId);
         Task GetUserComments();
         Task EditComment();
         Task DeleteComment();
