@@ -5,7 +5,7 @@ import type { UserRes } from "../types/UserTypes";
 type UserStore = {
     user: UserRes | null
     setUser: (user: UserRes) => void,
-    setUserAvatar: (avatarUrl: string) => void;
+    setUserDetails: (details: { avatarUrl?: string; userName?: string }) => void;
     logout: () => void
 }
 
@@ -14,10 +14,18 @@ export const useUserStore = create<UserStore>()(
         (set) => ({
             user: null,
             setUser: (user) => set({ user }),
-            setUserAvatar: (avatarUrl: string) =>
-                set((state) => ({
-                    user: state.user ? { ...state.user, avatarUrl } : null,
-                })),
+            setUserDetails: ({ avatarUrl, userName }) =>
+                set((state) => {
+                if (!state.user) return { user: null };
+
+                return {
+                    user: {
+                    ...state.user,
+                    avatarUrl: avatarUrl ?? state.user.avatarUrl,
+                    userName: userName ?? state.user.userName,
+                    },
+                };
+            }),
             logout: () => {
                 set({ user: null });
                 window.location.href = '/login';

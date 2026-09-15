@@ -4,11 +4,14 @@ import { useUserStore } from "../stores/userStore";
 import type { PaginationResult, PostRes } from "../types/PostTypes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+
+
 interface PostCardProps {
   post: PostRes;
+  leaveComment: () => void;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, leaveComment }: PostCardProps) {
   const queryClient = useQueryClient();
 
   const user = useUserStore((state) => state.user);
@@ -17,6 +20,7 @@ export default function PostCard({ post }: PostCardProps) {
     month: "short",
     day: "numeric",
   });
+
 
   const deletePostMutation = useMutation({
     mutationFn: (id: number) => postServices.deletePost(id),
@@ -44,21 +48,28 @@ export default function PostCard({ post }: PostCardProps) {
     }
   };
 
-  const handleLike = async () => {
-    const data = await postServices.likePost(post.id);
-    queryClient.setQueriesData({ queryKey: ["posts"] }, (old: PaginationResult<PostRes>) => {
-      if (!old) return old;
-      return {
-        ...old,
-        items: old.items.map((p: PostRes) =>
-          p.id === data.postId
-            ? { ...p, isLikedByCurrentUser: data.isLiked, likeCount: data.likeCount }
-            : p
-        ),
-      };
-    });
-  }
+  const likeMutation = useMutation({
+    mutationFn: () => postServices.likePost(post.id),
+    onSuccess: (data) => {
+      queryClient.setQueriesData<PaginationResult<PostRes>>(
+        { queryKey: ['posts'] },
+        (old): PaginationResult<PostRes> | undefined => {
+          if (!old) return old;
 
+          return {
+            ...old,
+            items: old.items.map((p: PostRes): PostRes =>
+              p.id === data.postId
+                ? { ...p, isLikedByCurrentUser: data.isLiked, likeCount: data.likeCount }
+                : p
+            ),
+          };
+        }
+      );
+    },
+  });
+  
+  
   return (
     <article className="w-full border-b border-slate-800 bg-slate-900/40 p-5 transition-colors hover:bg-slate-900/70 cursor-pointer">
       <div className="mb-3 flex items-center justify-between ">
@@ -130,8 +141,9 @@ export default function PostCard({ post }: PostCardProps) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            handleLike();
+            likeMutation.mutate();
           }}
+          disabled={likeMutation.isPending}
           className={`group flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium cursor-pointer transition ${
             post.isLikedByCurrentUser
               ? 'text-rose-500 hover:bg-rose-500/10'
@@ -156,7 +168,10 @@ export default function PostCard({ post }: PostCardProps) {
 
         <button
           type="button"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            leaveComment()
+          }}
           className="group flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium cursor-pointer text-slate-400 transition hover:bg-slate-800 hover:text-indigo-400"
         >
           <svg

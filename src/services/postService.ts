@@ -1,5 +1,5 @@
 import { apiClient } from "../lib/axios"
-import type { LikePostRes, PaginationResult,  PostRes } from "../types/PostTypes";
+import type { CommentReq, CommentRes, LikePostRes, PaginationResult,  PostRes } from "../types/PostTypes";
 
 export const postServices = {
     createPost: async (post: FormData): Promise<PostRes> => {
@@ -21,7 +21,10 @@ export const postServices = {
         return response.data;
     },
 
-    
+    leaveComment: async (comment: CommentReq): Promise<CommentRes> => {
+        const response = await apiClient.post<CommentRes>('api/post/leaveComment/', comment);
+        return response.data;
+    },
 
     deletePost: async (postId: number): Promise<boolean> => {
         const response = await apiClient.delete<boolean>(`api/post/deletePost/${postId}`);

@@ -1,26 +1,53 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { postServices } from "../../services/postService";
-import type { PaginationResult, PostRes } from "../../types/PostTypes";
+import type { CommentReq, PaginationResult, PostRes } from "../../types/PostTypes";
 import { useSearchParams } from "react-router-dom";
 import PostCard from "../../components/PostCard";
 import CreatePost from "../../components/CreatePost";
+import CommentModal from "../../components/CommentModal";
+import { useState } from "react";
 
 
 export default function HomePage () {
-   const [searchParams, setSearchParams] = useSearchParams();
+    const queryClient = useQueryClient(); 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [activePostId, setActivePostId] = useState<number | null>(null);
 
-  const pageNumber = Number(searchParams.get('pageNumber')) || 1;
-  const pageSize = 5;
+    const pageNumber = Number(searchParams.get('pageNumber')) || 1;
+    const pageSize = 5;
 
-  const { data: posts } = useSuspenseQuery<PaginationResult<PostRes>>({
-    queryKey: ['posts', pageNumber, pageSize],
-    queryFn: () => postServices.getAllPosts(pageNumber, pageSize),
-  });
+    const { data: posts } = useSuspenseQuery<PaginationResult<PostRes>>({
+        queryKey: ['posts', pageNumber, pageSize],
+        queryFn: () => postServices.getAllPosts(pageNumber, pageSize),
+    });
 
-  const setPage = (newPage: number) => {
-    searchParams.set('pageNumber', String(newPage));
-    setSearchParams(searchParams);
-  };
+    const commentMutation = useMutation({
+        mutationFn: (comment: CommentReq) => postServices.leaveComment(comment),
+        onSuccess: (data) => {
+        queryClient.setQueriesData<PaginationResult<PostRes>>(
+            { queryKey: ['posts'] },
+            (old) => {
+            if (!old) return old;
+            return {
+                ...old,
+                items: old.items.map((p) =>
+                p.id === data.postId
+                    ? { ...p, commentCount: (p.commentCount ?? 0) + 1 }
+                    : p
+                ),
+            };
+            }
+        );
+        },
+        onError: (error) => {
+        console.error('Failed to post comment:', error);
+        },
+    });
+
+    const setPage = (newPage: number) => {
+        searchParams.set('pageNumber', String(newPage));
+        setSearchParams(searchParams);
+    };
 
     return (
         <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-950 px-4 py-6 sm:px-6 lg:px-8">
@@ -29,8 +56,22 @@ export default function HomePage () {
                 <CreatePost />
 
                 <div className="divide-y divide-slate-800/80">
+                {activePostId && (
+                <CommentModal 
+                    isOpen={true}
+                    onClose={() => setActivePostId(null)}
+                    isSubmitting={commentMutation.isPending}
+                    post={posts.items.find((p) => p.id === activePostId)!}
+                    onSubmit={(commentText: string) => {
+                    commentMutation.mutateAsync({
+                        postId: activePostId,
+                        comment: commentText, 
+                    });
+                    }}
+                />
+                )}
                 {posts.items.map((post) => (
-                    <PostCard key={post.id} post={post} />
+                    <PostCard key={post.id} post={post} leaveComment={() => setActivePostId(post.id)}/>
                 ))}
                 </div>
             </main>

@@ -2,7 +2,7 @@
         content: string
         image: File | null
     }
-
+ 
     export interface PostRes {
         id: number
         userId: number
@@ -11,7 +11,7 @@
         content: string
         imageUrl: string | null
         likeCount: number
-        isLikedByCurrentUser: false
+        isLikedByCurrentUser: boolean
         commentCount: number
         createdAt: string
     }
@@ -25,9 +25,24 @@
         hasPreviousPage: boolean
         hasNextPage: boolean
     }
-
+    
     export interface LikePostRes {
         postId: number
         isLiked: boolean
         likeCount: number
+    }
+
+    export interface CommentReq {
+        postId: number
+        comment: string
+    }
+
+    export interface CommentRes {
+        id: number,
+        postId: number,
+        comment: string,
+        createdAt: string,
+        userId: number,
+        username: string,
+        userImageUrl: string
     }

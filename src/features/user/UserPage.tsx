@@ -6,7 +6,7 @@ import { useUserStore } from '../../stores/userStore';
 export default function UserPage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const setUserAvatar = useUserStore((state) => state.setUserAvatar);
+  const setUserDetails = useUserStore((state) => state.setUserDetails);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,6 +24,7 @@ export default function UserPage() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(['userProfile'], updatedProfile);
       setIsEditing(false);
+      setUserDetails({ userName: updatedProfile.userName})
     },
   });
 
@@ -31,7 +32,7 @@ export default function UserPage() {
     mutationFn: userServices.changeUserAvatar,
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(['userProfile'], updatedProfile);
-      setUserAvatar(updatedProfile.avatarUrl);
+      setUserDetails({ avatarUrl: updatedProfile.avatarUrl});
     },
   });
 
