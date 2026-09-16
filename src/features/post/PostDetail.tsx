@@ -2,11 +2,12 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { postServices } from "../../services/postService";
-// import { useUserStore } from "../../stores/userStore";
 import type { PostRes, CommentReq, PaginationResult, CommentRes } from "../../types/PostTypes";
 import CommentModal from "../../components/CommentModal";
 import PaginationFooter from "../../components/PaginationFooter";
 import PostCard from "../../components/PostCard";
+import CommentCard from "../../components/CommentCard";
+import CreateComment from "../../components/CreateComment";
 
 export default function PostDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +21,7 @@ export default function PostDetailsPage() {
   const pageSize = 2 ;
 
   const { data: comments } = useSuspenseQuery<PaginationResult<CommentRes>>({
-    queryKey: ['postComments', pageNumber, pageSize],
+    queryKey: ['postComments', postId, pageNumber, pageSize],
     queryFn: () => postServices.getPostComments(postId, pageNumber, pageSize),
   });
 
@@ -29,9 +30,7 @@ export default function PostDetailsPage() {
     setSearchParams(searchParams);
   };
 
-  const {
-    data: post,
-  } = useSuspenseQuery<PostRes>({
+  const { data: post } = useSuspenseQuery<PostRes>({
     queryKey: ["post", postId],
     queryFn: () => postServices.getPost(postId),
   });
@@ -40,6 +39,14 @@ export default function PostDetailsPage() {
   const commentMutation = useMutation({
       mutationFn: (comment: CommentReq) => postServices.leaveComment(comment),
       onSuccess: (data) => {
+        queryClient.setQueryData<PostRes>(["post", postId], (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            commentCount: (old.commentCount ?? 0) + 1,
+          };
+        });
+
         queryClient.setQueriesData<PaginationResult<PostRes>>(
             { queryKey: ['posts'] },
             (old) => {
@@ -54,25 +61,15 @@ export default function PostDetailsPage() {
             };
             }
         );
+
+        queryClient.invalidateQueries({
+          queryKey: ["postComments", postId],
+        });
       },
       onError: (error) => {
       console.error('Failed to post comment:', error);
       },
   });
-  // const commentMutation = useMutation({
-  //   mutationFn: (comment: CommentReq) => postServices.leaveComment(comment),
-  //   onSuccess: () => {
-  //     queryClient.setQueryData<PostRes>(["post", postId], (old) => {
-  //       if (!old) return old;
-  //       return {
-  //         ...old,
-  //         commentCount: (old.commentCount ?? 0) + 1,
-  //       };
-  //     });
-  //     queryClient.invalidateQueries({ queryKey: ["posts"] });
-  //     queryClient.invalidateQueries({ queryKey: ["postComments", postId] });
-  //   },
-  // });
 
   if (isNaN(postId)) {
     return (
@@ -102,37 +99,36 @@ export default function PostDetailsPage() {
 
         <PostCard key={post.id} post={post} leaveComment={() => setActivePostId(post.id)}/>
 
-        {/* <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 backdrop-blur-sm">
-          <form onSubmit={handleInlineCommentSubmit} className="space-y-3">
-            <textarea
-              rows={3}
-              value={inlineComment}
-              onChange={(e) => setInlineComment(e.target.value)}
-              placeholder="Write a comment..."
-              className="w-full resize-none rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200 placeholder-slate-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            />
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={!inlineComment.trim() || commentMutation.isPending}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {commentMutation.isPending ? "Posting..." : "Comment"}
-              </button>
-            </div>
-          </form>
-        </section> */}
+        <div className="mt-4">
+          <CreateComment
+            postId={post.id}
+            isSubmitting={commentMutation.isPending}
+            onSubmit={async (commentText) => {
+              await commentMutation.mutateAsync({
+                postId: post.id,
+                comment: commentText,
+              });
+            }}
+          />
+        </div>
 
         <section className="mt-6 space-y-3">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
             Comments ({post.commentCount})
           </h3>
 
-          <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-500">
-            Comments will be rendered here.
-          </div>
+          {comments.items.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-500">
+              No comments yet. Be the first to comment!
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {comments.items.map((comment) => (
+                <CommentCard key={comment.id} comment={comment} />
+              ))}
+            </div>
+          )}
 
-          {/* Pagination Footer */}
           <PaginationFooter
             pageNumber={pageNumber}
             totalPages={comments.totalPages}
@@ -156,21 +152,6 @@ export default function PostDetailsPage() {
               }}
             />
           )}
-
-        {/* {isCommentModalOpen && (
-          <CommentModal
-            isOpen={isCommentModalOpen}
-            onClose={() => setIsCommentModalOpen(false)}
-            isSubmitting={commentMutation.isPending}
-            post={post}
-            onSubmit={async (commentText) => {
-              await commentMutation.mutateAsync({
-                postId: post.id,
-                comment: commentText,
-              });
-            }}
-          />
-        )} */}
       </div>
     </div>
   );
