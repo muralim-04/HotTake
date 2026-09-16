@@ -22,7 +22,7 @@ export const postServices = {
     },
 
     getPostComments: async (postId: number, pageNumber: number, pageSize: number): Promise<PaginationResult<CommentRes>> => {
-        const response = await apiClient.get<PaginationResult<CommentRes>>(`api/post/getPostsComments?postId=${postId}&pageNumber=${pageNumber}&pageSize=${pageSize}`);
+        const response = await apiClient.get<PaginationResult<CommentRes>>(`api/post/getPostComments?postId=${postId}&pageNumber=${pageNumber}&pageSize=${pageSize}`);
         return response.data;
     },
 

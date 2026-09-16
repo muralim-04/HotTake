@@ -21,7 +21,8 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
   const formattedDate = new Date(post.createdAt).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
-  });
+    year: "numeric",
+  }); 
 
 
   const deletePostMutation = useMutation({
@@ -48,11 +49,23 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
     if (window.confirm("Are you sure you want to delete this post?")) {
       deletePostMutation.mutate(post.id);
     }
+    if (window.location.pathname == `/post/${post.id}`) {
+      navigate('/');
+    }
   };
 
   const likeMutation = useMutation({
     mutationFn: () => postServices.likePost(post.id),
     onSuccess: (data) => {
+      queryClient.setQueryData<PostRes>(["post", post.id], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          isLikedByCurrentUser: data.isLiked,
+          likeCount: data.likeCount,
+        };
+      });
+
       queryClient.setQueriesData<PaginationResult<PostRes>>(
         { queryKey: ['posts'] },
         (old): PaginationResult<PostRes> | undefined => {
@@ -72,8 +85,10 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
   });
   
   const handleCardClick = () => {
-    navigate(`/post/${post.id}`)
-  }
+    if (window.location.pathname !== `/post/${post.id}`) {
+      navigate(`/post/${post.id}`);
+    }
+  };
   
   return (
     <article onClick={handleCardClick} className="w-full border-b border-slate-800 bg-slate-900/40 p-5 transition-colors hover:bg-slate-900/70 cursor-pointer">
