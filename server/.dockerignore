@@ -1,0 +1,12 @@
+appsettings.Development.json
+
+Uploads/
+
+bin/
+obj/
+
+.git
+.gitignore
+.vs/
+.vscode/
+*.user
