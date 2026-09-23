@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using practice_dotnet.Helpers;
 using practice_dotnet.DTOs;
 using Microsoft.Extensions.Configuration.UserSecrets;
+using practice_dotnet.Services.BlobService;
 
 namespace practice_dotnet.Services.PostServices
 {
@@ -11,10 +12,12 @@ namespace practice_dotnet.Services.PostServices
     {
         private readonly DataContext _context;
         private readonly IWebHostEnvironment _environment;
-        public PostService(DataContext context, IWebHostEnvironment environment)
+        private readonly IBlobService _blobService;
+        public PostService(DataContext context, IWebHostEnvironment environment, IBlobService blobService)
         {
             _context = context;
             _environment = environment;
+            _blobService = blobService;
         }
 
         public async Task<Response<CommentResDto>> CreateComment(int userId, CommentReqDto comment)
@@ -74,7 +77,7 @@ namespace practice_dotnet.Services.PostServices
             string? imageUrl = null;
             if (post.Image != null && post.Image.Length > 0)
             {
-                imageUrl = await UploadImageAsync(post.Image);
+                imageUrl = await _blobService.UploadImageAsync(post.Image);
             }
 
             var newPost = new UserPost
@@ -125,7 +128,7 @@ namespace practice_dotnet.Services.PostServices
 
             if (!string.IsNullOrEmpty(post.ImageUrl))
             {
-                DeleteImageFile(post.ImageUrl);
+                await _blobService.DeleteImageFile(post.ImageUrl);
             }
 
             _context.UserPosts.Remove(post);
@@ -327,38 +330,5 @@ namespace practice_dotnet.Services.PostServices
 
         }
 
-        private async Task<string> UploadImageAsync(IFormFile file)
-        {
-            string uploadsFolder = Path.Combine(_environment.ContentRootPath, "Uploads");
-
-            string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return $"/Uploads/{uniqueFileName}";
-        }
-
-        private void DeleteImageFile(string imageUrl)
-        {
-            try
-            {
-                string relativePath = imageUrl.TrimStart('/', '\\');
-
-                string filePath = Path.Combine(_environment.ContentRootPath, relativePath);
-
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                } 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to delete image file: {ex.Message}");
-            }
-        }
     }
 }

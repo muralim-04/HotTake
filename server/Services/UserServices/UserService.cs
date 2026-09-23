@@ -4,6 +4,7 @@ using practice_dotnet.Data;
 using practice_dotnet.DTOs;
 using practice_dotnet.Entities;
 using practice_dotnet.Helpers;
+using practice_dotnet.Services.BlobService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,11 +16,13 @@ namespace practice_dotnet.Services.UserServices
         private readonly DataContext _context;
         private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _environment;
-        public UserService(DataContext context, IConfiguration config, IWebHostEnvironment environment)
+        private readonly IBlobService _blobService;
+        public UserService(DataContext context, IConfiguration config, IWebHostEnvironment environment, IBlobService blobService)
         {
             _context = context;
             _config = config;
             _environment = environment;
+            _blobService = blobService;
         }
 
         public async Task<Response<bool>> DeleteAccount(int id)
@@ -170,7 +173,7 @@ namespace practice_dotnet.Services.UserServices
                 return Response<UserResDto>.Fail("No image file provided");
             }
 
-            var imageUrl = await UploadImageAsync(dto.Image);
+            var imageUrl = await _blobService.UploadImageAsync(dto.Image);
             existingUser.AvatarUrl = imageUrl;
 
             await _context.SaveChangesAsync();
@@ -187,38 +190,5 @@ namespace practice_dotnet.Services.UserServices
             return Response<UserResDto>.Ok(updatedUser);
         }
 
-        private async Task<string> UploadImageAsync(IFormFile file)
-        {
-            string uploadsFolder = Path.Combine(_environment.ContentRootPath, "Uploads");
-
-            string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return $"/Uploads/{uniqueFileName}";
-        }
-
-        private void DeleteImageFile(string imageUrl)
-        {
-            try
-            {
-                string relativePath = imageUrl.TrimStart('/', '\\');
-
-                string filePath = Path.Combine(_environment.ContentRootPath, relativePath);
-
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to delete image file: {ex.Message}");
-            }
-        }
     }
 }

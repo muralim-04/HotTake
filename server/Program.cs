@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using practice_dotnet.Data;
 using practice_dotnet.Middleware;
 using practice_dotnet.Services.AuthService;
+using practice_dotnet.Services.BlobService;
 using practice_dotnet.Services.PostServices;
 using practice_dotnet.Services.UserServices;
 using System.Text;
@@ -50,6 +51,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddSingleton<IBlobService, BlobService>();
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
@@ -111,7 +113,6 @@ var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionHandler>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -121,19 +122,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
-
-var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "Uploads");
-
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-}
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/Uploads"
-});
 
 app.UseAuthorization();
 
