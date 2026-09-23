@@ -19,11 +19,6 @@ export default function Navbar () {
     }
   };
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-
-  const fullAvatarUrl = user?.avatarUrl
-    ? `${baseUrl}/${user.avatarUrl.replace(/^\//, "")}`
-    : undefined;
 
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-6 py-3.5 backdrop-blur-md">
@@ -46,7 +41,7 @@ export default function Navbar () {
             >
               {user.avatarUrl ? (
                 <img
-                  src={fullAvatarUrl}
+                  src={user.avatarUrl}
                   alt={user.userName}
                   className="h-8 w-8 rounded-full border border-slate-700 object-cover"
                 />

@@ -43,12 +43,6 @@ export default function CommentModal({
     }
   };
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-
-  const fullAvatarUrl = post.userProfileImageUrl
-    ? `${baseUrl}/${post.userProfileImageUrl.replace(/^\//, "")}`
-    : undefined;
-
   const formattedDate = post.createdAt
     ? new Date(post.createdAt).toLocaleDateString()
     : '';
@@ -91,7 +85,7 @@ export default function CommentModal({
             <div className="flex flex-col items-center">
               {post.userProfileImageUrl ? (
                 <img
-                  src={fullAvatarUrl}
+                  src={post.userProfileImageUrl}
                   alt={post.username}
                   className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover"
                   onError={(e) => {

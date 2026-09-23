@@ -60,11 +60,6 @@ export default function UserPage() {
     }
   };
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-
-  const fullAvatarUrl = user.avatarUrl
-    ? `${baseUrl}/${user.avatarUrl.replace(/^\//, "")}`
-    : undefined;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
@@ -75,7 +70,7 @@ export default function UserPage() {
               <div className="relative">
                 {user.avatarUrl ? (
                   <img
-                    src={fullAvatarUrl}
+                    src={user.avatarUrl}
                     alt={user.userName}
                     className="h-24 w-24 rounded-full border-2 border-slate-700 bg-slate-800 object-cover shadow-lg sm:h-28 sm:w-28"
                   />

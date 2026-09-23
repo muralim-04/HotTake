@@ -12,17 +12,12 @@ export default function CommentCard({ comment }: CommentCardProps) {
     year: "numeric",
   });
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-  const fullAvatarUrl = comment.userImageUrl
-    ? `${baseUrl}/${comment.userImageUrl.replace(/^\//, "")}`
-    : undefined;
-
   return (
     <div className="flex gap-3 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 transition-colors hover:bg-slate-900/60">
       <Link to={`/user/${comment.userId}`} className="shrink-0">
-        {fullAvatarUrl ? (
+        {comment.userImageUrl ? (
           <img
-            src={fullAvatarUrl}
+            src={comment.userImageUrl}
             alt={comment.username}
             className="h-9 w-9 rounded-full border border-slate-700 object-cover transition hover:border-indigo-500"
             onError={(e) => {

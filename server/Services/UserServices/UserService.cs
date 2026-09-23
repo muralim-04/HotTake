@@ -173,10 +173,17 @@ namespace practice_dotnet.Services.UserServices
                 return Response<UserResDto>.Fail("No image file provided");
             }
 
+            var oldAvatarUrl = existingUser.AvatarUrl;
+
             var imageUrl = await _blobService.UploadImageAsync(dto.Image);
             existingUser.AvatarUrl = imageUrl;
 
             await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrWhiteSpace(oldAvatarUrl))
+            {
+                await _blobService.DeleteImageFile(oldAvatarUrl);
+            }
 
             var updatedUser = new UserResDto
             {

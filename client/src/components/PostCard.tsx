@@ -35,16 +35,6 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
     },
   });
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-
-  const fullPostImageUrl = post.imageUrl
-    ? `${baseUrl}/${post.imageUrl.replace(/^\//, "")}`
-    : undefined;
-
-  const fullAvatarUrl = post.userProfileImageUrl
-    ? `${baseUrl}/${post.userProfileImageUrl.replace(/^\//, "")}`
-    : undefined;
-
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       deletePostMutation.mutate(post.id);
@@ -98,9 +88,9 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
           onClick={(e) => e.stopPropagation()}
           className="group flex items-center gap-3"
         >
-          {fullAvatarUrl ? (
+          {post.userProfileImageUrl ? (
             <img
-              src={fullAvatarUrl}
+              src={post.userProfileImageUrl}
               alt={post.username}
               className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover ring-2 ring-transparent transition group-hover:border-indigo-500 group-hover:ring-indigo-500/20"
               onError={(e) => {
@@ -142,10 +132,10 @@ export default function PostCard({ post, leaveComment }: PostCardProps) {
         {post.content}
       </p>
 
-      {fullPostImageUrl && (
+      {post.imageUrl && (
         <div className="mt-3 flex justify-center overflow-hidden rounded-2xl border border-slate-800 bg-black/40">
           <img
-            src={fullPostImageUrl}
+            src={post.imageUrl}
             alt="Post attachment"
             loading="lazy"
             onError={(e) => {

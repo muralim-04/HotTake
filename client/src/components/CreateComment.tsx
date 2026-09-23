@@ -16,11 +16,6 @@ export default function CreateComment({
   const [error, setError] = useState<string | null>(null);
   const user = useUserStore((state) => state.user);
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-  const fullAvatarUrl = user?.avatarUrl
-    ? `${baseUrl}/${user.avatarUrl.replace(/^\//, "")}`
-    : undefined;
-
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmed = content.trim();
@@ -57,9 +52,9 @@ export default function CreateComment({
     >
       <div className="flex gap-3">
         <div className="shrink-0">
-          {fullAvatarUrl ? (
+          {user.avatarUrl ? (
             <img
-              src={fullAvatarUrl}
+              src={user.avatarUrl}
               alt={user.userName}
               className="h-9 w-9 rounded-full border border-slate-700 object-cover"
               onError={(e) => {
